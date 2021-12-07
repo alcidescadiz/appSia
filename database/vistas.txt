@@ -1,0 +1,180 @@
+
+//////  VISTA DE LA TABLA COMPRAS////////////////
+----------------------------------------------------
+create or replace VIEW v_compras as
+SELECT c.id, c.fecha, c.id_proveedor, upper(p.nombre) as nombre, c.id_tipo_pago, upper(t.tipo) as tipo, c.total_iva, c.subtotal, c.total, c.estatus 
+FROM compras c
+inner join proveedores p on p.id= c.id_proveedor
+inner join tipospagos  t on t.id= c.id_tipo_pago
+where c.estatus = 'activo'
+order by c.id desc
+---------------------------------------------------
+****************************************************
+-----------------------------------------------
+
+//////  VISTA DE LA TABLA VENTAS////////////////
+-----------------------------------------------------
+create or replace VIEW v_ventas as
+SELECT v.id, v.fecha, v.id_cliente, upper(p.nombre) as nombre, v.id_tipo_pago, upper(t.tipo) as tipo, v.total_iva, v.subtotal, v.total, v.estatus 
+FROM ventas v
+inner join clientes p on p.id= v.id_cliente
+inner join tipospagos  t on t.id= v.id_tipo_pago
+where v.estatus = 'activo'
+order by v.id desc
+
+---------------------------------------------------
+****************************************************
+
+//////  VISTA DE GANANCIAS y ALMACEN ////////////////
+-------------------------------------------------
+generar en ell orden escrito:
+-------------------------------------------------------
+create or replace view v_reporte_ventas as
+select p.id, p.codigo, p.nombre, p.estatus, dv.precio_venta ,sum(dv.cantidad) as cantidad_ventas , sum(dv.subtotal) as ventas,
+((dv.precio_venta-dv.costo)*sum(dv.cantidad)) as ganancias
+from productos p
+inner join detalle_ventas dv on dv.id_productos = p.id
+where dv.estatus='activo'
+group by p.id
+order by p.nombre ASC
+
+----------------------------------------------------------
+create or replace view v_reporte_compras as
+select p.id, p.codigo, p.nombre, p.estatus, p.costo ,sum(dc.cantidad) as cantidad_compras , sum(dc.subtotal) as compras
+from productos p
+inner join detalle_compras dc on dc.id_productos = p.id
+where dc.estatus='activo'
+group by p.id
+order by p.nombre ASC
+--------------------------------------------
+
+create or replace view v_ganancias as
+SELECT rc.codigo, rc.nombre, 
+rc.costo,rc.cantidad_compras, rc.compras,   
+rv.precio_venta, rv.cantidad_ventas,rv.ventas, rv.ganancias
+FROM v_reporte_compras rc
+LEFT join v_reporte_ventas rv on rc.nombre=rv.nombre
+---------------------------------------------------
+create or replace view v_almacen as
+select  rc.codigo, rc.nombre,rc.estatus, rc.cantidad_compras as compras , 
+CASE
+	when rv.cantidad_ventas IS NULL then 0
+    when rv.cantidad_ventas >=0  then rv.cantidad_ventas
+end as ventas,
+CASE
+	when (rc.cantidad_compras-(rv.cantidad_ventas)) IS NULL then rc.cantidad_compras
+    when (rc.cantidad_compras-(rv.cantidad_ventas))IS NOT NULL then (rc.cantidad_compras-(rv.cantidad_ventas))
+end as existencias, 
+case 
+    when (rc.cantidad_compras-(rv.cantidad_ventas )) < 1 then 'Punto de pedido'
+    when (rc.cantidad_compras-(rv.cantidad_ventas)) >= 1 then 'Disponibilidad de venta'
+    END AS acciones,
+case 
+	when (rc.cantidad_compras-(rv.cantidad_ventas )) < 1 then 'FF7878'
+    when (rc.cantidad_compras-(rv.cantidad_ventas ))  BETWEEN  1  and 10 then 'FCFFA6'
+    else 'C1FFD7'
+END AS color
+FROM v_reporte_ventas rv
+RIGHT join v_reporte_compras rc on rc.nombre=rv.nombre
+group by rc.nombre
+order by rc.nombre ASC
+
+---------------------------------------------------
+****************************************************
+-----------------------------------------------
+
+//////-----  IDICADOR DE COMPRAS POR TIPO DE PAGO ----/////
+-----------------------------------------------------
+create or replace view v_indicador_compras as
+SELECT t.id, t.tipo, t.estatus, sum(c.total) as total
+FROM tipospagos t
+INNER join compras c on t.id=c.id_tipo_pago
+where c.estatus= 'activo'
+group by t.tipo
+---------------------------------------------------
+****************************************************
+-----------------------------------------------
+
+//////-----  IDICADOR DE ventas POR TIPO DE PAGO ----/////
+-----------------------------------------------------
+create or replace view v_indicador_ventas as
+SELECT t.id, t.tipo, t.estatus, sum(v.total) as total
+FROM tipospagos t
+INNER join ventas v on t.id= v.id_tipo_pago
+where v.estatus= 'activo'
+group by t.tipo
+
+//////  VISTA DEL CUENTAS POR PAGAR ////////////////
+-----------------------------------------------------
+create or replace view v_cuentas_por_pagar as
+select c.id, c.fecha, p.nombre, t.tipo, c.total, cc.estatus, 
+adddate(c.fecha, INTERVAL 7 day)as  fecha_a_pagar, 
+case 
+	when to_days(now())-to_days(c.fecha)< 2 then 'C1FFD7'
+    when to_days(now())-to_days(c.fecha)BETWEEN  2 and 4 then 'FCFFA6'
+    else 'FF7878'
+end color,
+cc.id as idc
+from compras c 
+inner join cuentas cc on cc.codigo=c.id
+inner join proveedores p on p.id=c.id_proveedor
+inner join tipospagos t on t.id=c.id_tipo_pago
+where c.id_tipo_pago=1 
+and cc.tipo= 'compras'
+and cc.estatus = 'pendiente'
+and c.estatus = 'activo'
+//////  VISTA DEL CUENTAS POR COBRAR ////////////////
+-----------------------------------------------------
+create or replace view v_cuentas_por_cobrar as
+select v.id, v.fecha, p.nombre, t.tipo, v.total, cc.estatus, 
+adddate(v.fecha, INTERVAL 7 day)as  fecha_a_pagar, 
+case 
+	when to_days(now())-to_days(v.fecha)< 2 then 'C1FFD7'
+    when to_days(now())-to_days(v.fecha)BETWEEN  2 and 4 then 'FCFFA6'
+    else 'FF7878'
+end color,
+cc.id as idc
+from ventas v 
+inner join cuentas cc on cc.codigo=v.id
+inner join clientes p on p.id=v.id_cliente
+inner join tipospagos t on t.id=v.id_tipo_pago
+where v.id_tipo_pago=1 
+and cc.tipo= 'ventas'
+and cc.estatus = 'pendiente'
+
+//////  VISTA DE DETALLES COMPRAS ////////////////
+-----------------------------------------------------
+create or replace view v_detalles_compras as
+SELECT d.id, d.id_compras, p.nombre, d.costo, d.cantidad, d.iva, d.subtotal, d.estatus  
+        FROM detalle_compras d
+        INNER join productos p on d.id_productos = p.id
+        where d.estatus='activo'
+
+//////  VISTA DE DETALLES VENTAS ////////////////
+-----------------------------------------------------
+create or replace view v_detalles_ventas as
+SELECT d.id, d.id_ventas, p.nombre, d.costo, d.precio_venta, d.cantidad, d.iva, d.subtotal, d.estatus,
+(d.precio_venta-d.costo)*(d.cantidad) as ganancia  
+FROM detalle_ventas d
+INNER join productos p on d.id_productos = p.id
+
+//////  VISTA DE DETALLES COMPUESTOS ////////////////
+-----------------------------------------------------
+create or replace view v_detalles_compuestos as
+SELECT d.id, d.id_compuesto, p.nombre, d.costo, d.cantidad, d.iva, d.subtotal, d.estatus
+FROM detalle_compuestos d
+INNER join productos p on d.id_productos = p.id
+
+//////////////////////////////////////////////////////////
+--------------TRIGGER CUENTAS COMPRAS--------------------
+DROP TRIGGER IF EXISTS `cuenta_compras`;
+CREATE TRIGGER `cuenta_compras` AFTER 
+INSERT ON `compras` FOR EACH ROW BEGIN 
+INSERT into cuentas values (null, new.id, 'compras', new.fecha, 'pendiente',new.id_tipo_pago); end
+//////////////////////////////////////////////////////////
+--------------TRIGGER CUENTAS VENTAS--------------------
+DROP TRIGGER IF EXISTS `cuenta_ventas`;
+CREATE DEFINER=`root`@`localhost` TRIGGER `cuenta_ventas` 
+AFTER INSERT ON `ventas` FOR EACH ROW BEGIN 
+INSERT into cuentas values (null, new.id, 'ventas', new.fecha, 'pendiente', new.id_tipo_pago); 
+end
