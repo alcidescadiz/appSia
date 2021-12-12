@@ -8,6 +8,7 @@
 <a href="{{ url('/indicadores/{ventas}') }}" class="btn btn-info" style="margin:5px; padding: 5px"> Indicadores de Ventas</a> 
 <a href="{{ url('/indicadores/{entrefechas}') }}" class="btn btn-info" style="margin:5px; padding: 5px"> Indicadores entre fechas</a> 
 <a href="{{ url('/hoy') }}" class="btn btn-info" style="margin:5px; padding: 5px"> Indicadores de Hoy</a>
+<a href="{{ url('/indicadores/{pordia}') }}" class="btn btn-info" style="margin:5px; padding: 5px"> Indicadores por día</a>
 </div>
 <br>
 <div class="container" style="background-color: #EEEBDD; border-radius: 20px; padding: 20px">

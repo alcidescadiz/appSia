@@ -19,6 +19,16 @@
             </button>
         </div>
         @endif
+        @if (session()->has('message'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width:90%; text-aling:center; margin 5px;">
+                {{ session('message') }} 
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+        @endif
+
+
     <form action="{{URL::to('/compras')}}" method="POST" style="margin:5px; padding: 5px; width: 95% ">
         {!! csrf_field() !!} 
         <div class="form-group">
@@ -31,7 +41,7 @@
         </div>
         <div class="form-group">
             <label for="">Proveedor</label>
-            <select  class="form-control" name="id_proveedor" id="">
+            <select  class="form-control" name="id_proveedor" id=""  value="{{old('id_proveedor')}}">
                 <option value="">--Seleccione un proveedor--</option>
                 @foreach ($Lproveedores as $item)
                 <option value="{{$item->id}}">{{$item->nombre}}</option>
@@ -81,7 +91,7 @@
                 <tbody>
                     <tr>
                         <td data-titulo="Producto:">
-                                <select class="custom-select" name="" id="selectproducto" style="width: 150px" onchange="detalle_costo()">
+                                <select class="custom-select" name="nombre" id="selectproducto" style="width: 150px" onchange="detalle_costo()" value="{{old('nombre')}}">
                                     <option selected>Select one</option>
                                     @foreach ($productos as $item)
                                     <option value="{{$item->costo}}">{{$item->nombre}}</option>
@@ -92,7 +102,7 @@
                             </div>
                         </td>
                         <td data-titulo="Costo:">
-                            <input type="number" name="costo" id="costo" step="0.01" style="width: 100px" class="form-control" onchange="detalle_subtotal()">
+                            <input type="number" name="costo" id="costo" step="0.01" style="width: 100px" class="form-control" onchange="detalle_subtotal()" >
                         </td>
                         <td data-titulo="Cantidad:">
                             <input type="number" name="cantidad" id="cantidad" step="0.01" style="width: 100px" class="form-control" onchange="detalle_subtotal()">

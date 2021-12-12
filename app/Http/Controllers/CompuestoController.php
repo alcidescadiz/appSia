@@ -7,7 +7,8 @@ use App\Models\DetalleCompuesto;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\URL;
 
 class CompuestoController extends Controller
 {
@@ -26,7 +27,7 @@ class CompuestoController extends Controller
         }else {
             $idnew=1;
         }
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compuestos where id_compuesto = '$idnew'");
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compuestos where id_compuesto =?", [$idnew]);
         if ($totales[0]->tiva===null) {
             $tiva= 0;
             $tsubtotal= 0;
@@ -36,7 +37,6 @@ class CompuestoController extends Controller
             $tsubtotal= $totales[0]->tsubtotal;
             $ttotal= $totales[0]->ttotal;
         } 
-		
 		$productos = DB::table('productos')->get();  
         $detalles = DB::table('v_detalles_compuestos')
                     ->where('id_compuesto', $idnew)
@@ -73,10 +73,11 @@ class CompuestoController extends Controller
         //dd($request);
         if ($request->get('id_productos')=== null || $request->get('costo')=== null || $request->get('cantidad')=== null || $request->get('subtotal')=== null) {
             session()->flash('message', 'No hay detalles que registrar');
+            session()->flash('alert-class', 'alert alert-danger alert-dismissible fade show');
             return redirect('compuestos');
         } else {
             $id_detalle = $request->get('id_productos');
-            $busca = DB::select("select id, gravable, costo from productos where nombre= '$id_detalle'");
+            $busca = DB::select("select id, gravable, costo from productos where nombre= ?", [$id_detalle]);
             $busca[0]->id;
             $busca[0]->gravable;
             if ($busca[0]->gravable === 'si') {
@@ -116,7 +117,8 @@ class CompuestoController extends Controller
         $productocompuesto = DB::table('productos')
         ->where('id', $id)
         ->get(); 
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compuestos where id_compuesto = '$id'");
+
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compuestos where id_compuesto =?",  [$id]);
         if ($totales[0]->tiva===null) {
             $tiva= 0;
             $tsubtotal= 0;
@@ -125,7 +127,7 @@ class CompuestoController extends Controller
         }else {
             $tiva= $totales[0]->tiva;
             $tsubtotal= $totales[0]->tsubtotal;
-            $ttotal= $totales[0]->ttotal;
+            $ttotal= $totales[0]->tiva + $totales[0]->tsubtotal;
             $precio_venta=  $ttotal+($ttotal * $productocompuesto[0]->porcentage_ganancia/100);
         } 
 
@@ -140,11 +142,13 @@ class CompuestoController extends Controller
     public function detallescompuestosedit(Request $request) // agregar detalles al ditar
     {
         //dd($request);
+        $id= $request->get('id_compuesto');
         if ($request->get('id_productos')=== null || $request->get('costo')=== null || $request->get('cantidad')=== null || $request->get('subtotal')=== null) {
             session()->flash('message', 'No hay detalles que registrar');
+            session()->flash('alert-class', 'alert alert-danger alert-dismissible fade show');
         } else {
             $id_detalle = $request->get('id_productos');
-            $busca = DB::select("select id, gravable, costo from productos where nombre= '$id_detalle'");
+            $busca = DB::select("select id, gravable, costo from productos where nombre=?",  [$id_detalle]);
             $busca[0]->id;
             $busca[0]->gravable;
             if ($busca[0]->gravable === 'si') {
@@ -169,9 +173,10 @@ class CompuestoController extends Controller
                 'id_compras' => $request->get('id_compras')
             ]);
             session()->flash('message', 'Detalle registrado');
+            session()->flash('alert-class', 'alert alert-success alert-dismissible fade show');
         }
-        $id= $request->get('id_compuesto');
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compuestos where id_compuesto = '$id'");
+        //return redirect("editcompuesto/$id");
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compuestos where id_compuesto =?", [$id]);
         $productocompuesto = DB::table('productos')
                     ->where('id', $id)
                     ->get(); 
@@ -199,11 +204,13 @@ class CompuestoController extends Controller
         $data = DB::select("SELECT id, id_compuesto FROM detalle_compuestos where id = '$id'");
         $id2= $data[0]->id_compuesto;
         DB::table('detalle_compuestos')->delete($id);
+        session()->flash('message', 'Detalle eliminado');
+        session()->flash('alert-class', 'alert alert-danger alert-dismissible fade show');
         
         $productocompuesto = DB::table('productos')
                     ->where('id', $id2)
                     ->get(); 
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compuestos where id_compuesto = '$id2'");
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compuestos where id_compuesto =?", [$id2]);
         if ($totales[0]->tiva===null) {
             $tiva= 0;
             $tsubtotal= 0;
@@ -228,7 +235,7 @@ class CompuestoController extends Controller
         if ($request->get('porcentage_ganancia')=== null || $request->get('foto')=== null) {
             session()->flash('message', 'Verifique que la información esté disponible');
             $id= $request->get('id');
-            $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compuestos where id_compuesto = '$id'");
+            $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compuestos where id_compuesto = ?", [$id]);
             $productocompuesto = DB::table('productos')
                         ->where('id', $id)
                         ->get(); 

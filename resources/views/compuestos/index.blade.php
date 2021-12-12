@@ -19,17 +19,13 @@
             </button>
         </div>
     @endif
-    @if ($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="width:90%; text-aling:center; margin 5px;">
-        <ul style="text-aling:center;">
-            @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+    @if (session()->has('message'))
+    <div   class="alert {{ Session::get('alert-class', 'alert alert-success alert-dismissible fade show') }}"  role="alert" style="width:90%; text-aling:center; margin 5px;">
+        {{ session('message') }} 
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
-    </div>
+      </div>
     @endif
     <form action="{{URL::to('/crearcompuesto')}}" method="POST" style="margin:5px; padding: 5px; width: 95% ">
         {!! csrf_field() !!} 

@@ -95,7 +95,8 @@
 
         }
         </style> 
-        @livewireStyles   
+        @livewireStyles  
+        @laravelPWA 
     </head>
     <body>
         <div class="d-flex" id="wrapper">
@@ -132,22 +133,34 @@
 
                     <a href="{{ url('/ganancias') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond"> Ganancias</a> 
  
-            @endauth()
-        </div>
-        </div>
-        <!-- /#sidebar-wrapper -->
-        <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
-                <button class="btn btn-secondary" id="menu-toggle">Menu</button>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent" style="text-align: center">
-                <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-                <li class="nav-item active">
-                <a class="nav-link" href="{{ route('home') }}">Home <span class="sr-only">(current)</span></a>
-                </li>
+                    @endauth()
+                </div>
+            </div>
+            <!-- /#sidebar-wrapper -->
+            <!-- Page Content -->
+            <div id="page-content-wrapper">
+                <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+                    <button class="btn btn-secondary" id="menu-toggle">Menu</button>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent" style="text-align: center">
+                        <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                            @auth()
+                            @if ($n_cuentas_pagar[0]->total >0)
+                            <li class="nav-item active">
+                                    <a href="{{ url('/pagar') }}" class="btn btn-secondary"  style="margin: 5px"> Cuentas por pagar <span class="badge badge-success"> {{$n_cuentas_pagar[0]->total}}</span></a>
+                            </li>
+                            @endif
+                            @if ($n_cuentas_cobrar[0]->total >0)
+                            <li class="nav-item active">
+                                    <a href="{{ url('/cobrar') }}" class="btn btn-primary" style="margin: 5px"> Cuentas por cobrar <span class="badge badge-success"> {{$n_cuentas_cobrar[0]->total}}</span></a>  
+                            </li>
+                            @endif
+                            @endauth()
+                            <li class="nav-item active">
+                                <a class="nav-link" href="{{ route('home') }}">Home <span class="sr-only">(current)</span></a>
+                            </li>
                 <li class="nav-item dropdown">
                                         <!-- Right Side Of Navbar -->
                                         <ul class="navbar-nav ml-auto">

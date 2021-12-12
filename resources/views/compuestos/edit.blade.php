@@ -8,7 +8,7 @@
 
     <div class="col-sm-6 col-md-4" >
     @if (session()->has('message'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="width:90%; text-aling:center; margin 5px;">
+        <div class="alert {{ Session::get('alert-class', 'alert alert-success alert-dismissible fade show') }}" role="alert" style="width:90%; text-aling:center; margin 5px;">
             {{ session('message') }} 
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
@@ -73,7 +73,7 @@
 
     <div class="col-sm-5 col-md-8">
         <h3>Seleccione un producto:</h3>
-        <form action="{{URL::to('/detallescompuestosedit')}}" method="post" style="margin:5px; padding: 5px; width: 95% ">
+        <form action="{{URL::to('/detallescompuestosedit')}}" method="POST" style="margin:5px; padding: 5px; width: 95% ">
             {!! csrf_field() !!} 
         <table class="table table-striped table-inverse table-responsive">
             <thead class="thead-inverse">

@@ -73,7 +73,7 @@ class CompraController extends Controller
 
         $id_detalle = $request->get('id_productos');
         //dd($id_detalle);
-        $busca = DB::select("select id, gravable from productos where nombre= '$id_detalle'");
+        $busca = DB::select('SELECT id, gravable from productos where nombre= ?', [$id_detalle]);
         $busca[0]->id;
         $busca[0]->gravable;
         if ($busca[0]->gravable === 'si') {
@@ -81,7 +81,7 @@ class CompraController extends Controller
         }else {
             $monto_iva = 0;
         }
-    
+        session()->flash('message', 'Detalle a su compra ha sido agregado'); 
         DetalleCompra::create([
             'id_productos'=>$busca[0]->id,
             'costo' => $request->get('costo'),
@@ -90,6 +90,8 @@ class CompraController extends Controller
             'subtotal' => $request->get('subtotal'),
             'id_compras' => $request->get('id_compras')
         ]);
+
+
         return redirect('/facturac');
     }
 
@@ -106,7 +108,7 @@ class CompraController extends Controller
             ]);
             $id_detalle = $request->get('id_productos');
             //dd($id_detalle);
-            $busca = DB::select("select id, gravable from productos where nombre= '$id_detalle'");
+            $busca = DB::select('SELECT id, gravable from productos where nombre= ?', [$id_detalle]);
             $busca[0]->id;
             $busca[0]->gravable;
             if ($busca[0]->gravable === 'si') {
@@ -129,7 +131,7 @@ class CompraController extends Controller
         // coodigo proveedores productos y tipo de pago:
         $id= $request->get('id_compras');
         $productos = DB::table('productos')->get();  
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras = '$id'");
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras = ?",[$id]);
         if ($totales[0]->tiva===null) {
             $tiva= 0;
             $tsubtotal= 0;
@@ -143,7 +145,7 @@ class CompraController extends Controller
         ->where('id_compras', $id)
         ->get();
 
-        $compras= DB::select("SELECT * FROM v_compras where id = '$id'");
+        $compras= DB::select("SELECT * FROM v_compras where id =?", [$id]);
 
         return view('compras/update',['compras'=>$compras, 'id'=>$id, 'productos'=>$productos->toArray(), 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
 
@@ -169,7 +171,7 @@ class CompraController extends Controller
         }else {
             $idnew=1;
         }
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras = '$idnew'");
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras = ?", [$idnew]);
         if ($totales[0]->tiva===null) {
             $tiva= 0;
             $tsubtotal= 0;
@@ -200,7 +202,7 @@ class CompraController extends Controller
     public function edit($id)
     {
         $productos = DB::table('productos')->get();  
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras = '$id'");
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras =?", [$id]);
         //DD($totales);
         if ($totales[0]->tiva===null) {
             $tiva= 0;
@@ -215,7 +217,7 @@ class CompraController extends Controller
                     ->where('id_compras', $id)
                     ->get();
 
-        $compras= DB::select("SELECT * FROM v_compras where id = '$id'");
+        $compras= DB::select("SELECT * FROM v_compras where id =?", [$id]);
 
         return view('compras/update',['compras'=>$compras, 'id'=>$id, 'productos'=>$productos->toArray(), 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
     }
@@ -282,14 +284,14 @@ class CompraController extends Controller
     }
     public function detalledestroyedit($id)
     {
-        $id_compras = DB::select("SELECT id, id_compras FROM detalle_compras where id = '$id'");
+        $id_compras = DB::select("SELECT id, id_compras FROM detalle_compras where id =?", [$id]);
         $id_compras= $id_compras[0]->id_compras;
         DB::table('detalle_compras')->delete($id);
        // factura 
         // coodigo proveedores productos y tipo de pago:
         $id= $id_compras; 
         $productos = DB::table('productos')->get();  
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras = '$id'");
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras = ?", [$id]);
         if ($totales[0]->tiva===null) {
             $tiva= 0;
             $tsubtotal= 0;
@@ -303,7 +305,7 @@ class CompraController extends Controller
                     ->where('id_compras', $id)
                     ->get();
 
-        $compras= DB::select("SELECT * FROM v_compras where id = '$id'");
+        $compras= DB::select("SELECT * FROM v_compras where id =?", [$id]);
         session()->flash('message', 'Detalle eliminado');
         return view('compras/update',['compras'=>$compras, 'id'=>$id, 'productos'=>$productos->toArray(), 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
     

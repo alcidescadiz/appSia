@@ -19,6 +19,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/offline', function () {
+    return view('vendor/laravelpwa/offline');
+});
 
 Auth::routes();
 
@@ -60,6 +63,7 @@ Route::get('/indicadores/{type?}', [App\Http\Controllers\IndicadorController::cl
 Route::post('/entrefechas', [App\Http\Controllers\IndicadorController::class, 'entrefechas']);
 Route::get('/hoy', [App\Http\Controllers\IndicadorController::class, 'hoy']);
 Route::get('/ganancias', [App\Http\Controllers\IndicadorController::class, 'ganancias']);
+Route::post('/pordia', [App\Http\Controllers\IndicadorController::class, 'pordia']);
 // cuentas
 Route::get('/pagar', [App\Http\Controllers\CuentaController::class, 'pagar']);
 Route::put('pagar/{id}/edit',  [App\Http\Controllers\CuentaController::class, 'updatepagar']);
@@ -69,7 +73,7 @@ Route::put('cobrar/{id}/edit',  [App\Http\Controllers\CuentaController::class, '
 // compuestos 
 Route::get('/compuestos', [App\Http\Controllers\CompuestoController::class, 'compuestos']);
 Route::post('/crearcompuesto', [App\Http\Controllers\CompuestoController::class, 'crearcompuesto']);
-Route::put('editcompuesto/{id}',  [App\Http\Controllers\CompuestoController::class, 'editcompuesto']);
+Route::put('/editcompuesto/{id}',  [App\Http\Controllers\CompuestoController::class, 'editcompuesto']);
 Route::PUT('updatecompuesto/{id}',  [App\Http\Controllers\CompuestoController::class, 'updatecompuesto']);
 Route::post('/detallescompuestos', [App\Http\Controllers\CompuestoController::class, 'detallescompuestos']);
 Route::delete('detallescompuestos/{id}', [App\Http\Controllers\CompuestoController::class, 'detallecompuestodestroy']);

@@ -8,6 +8,7 @@
 <a href="{{ url('/indicadores/{ventas}') }}" class="btn btn-info" style="margin:5px; padding: 5px"> Indicadores de Ventas</a> 
 <a href="{{ url('/indicadores/{entrefechas}') }}" class="btn btn-info" style="margin:5px; padding: 5px"> Indicadores entre fechas</a> 
 <a href="{{ url('/hoy') }}" class="btn btn-info" style="margin:5px; padding: 5px"> Indicadores de Hoy</a>
+<a href="{{ url('/indicadores/{pordia}') }}" class="btn btn-info" style="margin:5px; padding: 5px"> Indicadores por día</a>
 </div>
 <br>
 
@@ -22,6 +23,11 @@
     @case('{entrefechas}')
 
     <x-indicadorentrefechas :indicadorV='$indicadorV'/>
+        @break
+    
+    @case('{pordia}')
+
+    <x-indicadorpordia :indicadorV='$indicadorV' :ganancia='$ganancia' :indicadorC='$indicadorC' />
         @break
     @default
     <div style="text-align: center">Seleccione de que desea el indicador</div>

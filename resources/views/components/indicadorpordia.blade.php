@@ -1,9 +1,8 @@
 <div class="container" style="background-color: #EADEDE; border-radius: 20px; padding: 20px">
-    <h2><i>Indicador entre fechas</i></h2>
+    <h2><i>Indicador por día</i></h2>
     <div class="row no-gutters" >    
-        <form action="{{URL::to('/entrefechas')}}" method="post">
+        <form action="{{URL::to('/pordia')}}" method="POST">
             @csrf
-
             @if (session()->has('message'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('message') }} 
@@ -12,7 +11,7 @@
                 </button>
               </div>
             @endif
-            
+
             @if ($errors->any())
             <div class="alert alert-danger alert-dismissible fade show" role="alert" style="width:90%; text-aling:center; margin 5px;">
                 <ul style="text-aling:center;">
@@ -29,10 +28,6 @@
             <div class="form-group">
             <label for="">Fecha inicio</label>
             <input type="date" name="fecha1" id="" class="form-control" value="{{old('fecha1')}}">
-            </div>
-            <div class="form-group">
-                <label for="">Fecha final</label>
-                <input type="date" name="fecha2" id="" class="form-control" value="{{old('fecha2')}}">
             </div>
             <div>
                 <button type="submit" class="btn btn-primary">Buscar</button>

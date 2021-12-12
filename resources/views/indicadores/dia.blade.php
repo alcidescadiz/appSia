@@ -16,7 +16,7 @@
 <div class="container" style="background-color: #EEEBDD; border-radius: 20px; padding: 20px">
     <div class="row no-gutters">    
     <div class="col-6 col-md-4" >
-        <h3><i>Indicadores de Compras de {{date("Y-m-d")}}</i></h3>
+        <h3><i>Indicadores de Compras del día:  {{$fecha1}}</i></h3>
 
         <div class="row justify-content-center">
         <table class="table table-striped table-inverse table-responsive">
@@ -96,7 +96,7 @@
 <div class="container" style="background-color: #EEEBDD; border-radius: 20px; padding: 20px">
     <div class="row no-gutters">    
     <div class="col-6 col-md-4" >
-        <h3><i>Indicadores de Ventas de {{date("Y-m-d")}}</i></h3>
+        <h3><i>Indicadores de Ventas de  {{$fecha1}}</i></h3>
         <h5><li>Ganancias acumuladas: {{$ganancias[0]->ganancia}}</li></h5>
         <div class="row justify-content-center">
         <table class="table table-striped table-inverse table-responsive">
