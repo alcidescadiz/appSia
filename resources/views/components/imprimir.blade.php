@@ -12,22 +12,19 @@
     <body>
         
 <div class="container" >
-    <div style="text-align: center">
-        <img src="{{ asset('img/Google-logo.jpg') }}" width="90%">
-    </div>
+    <h2><i> Factura appSia</i></h2>
     <h3>Codigo: {{$ventas[0]->id}}</h3>
     <div>Fecha: {{$ventas[0]->fecha}}</div>
     <div>Clinte: {{$ventas[0]->nombre}}</div>
     <div>Tipo de venta: {{$ventas[0]->tipo}}</div>
 <br>
-
 <table class="table">
     <tr>
-        <th style="width: 100px">Producto</th>
-        <th style="width: 80px">Cantidad</th>
-        <th style="width: 80px">Precio</th>
-        <th style="width: 80px">Iva</th>
-        <th style="width: 80px">Subtotal</th>
+        <td style="width: 100px"><b>Producto</b></td>
+        <td style="width: 80px"><b>Cantidad</b></td>
+        <td style="width: 80px"><b>Precio</b></td>
+        <td style="width: 80px"><b>Iva</b></td>
+        <td style="width: 80px"><b>Subtotal</b></td>
     </tr>
 @foreach ($detalles as $item)
     <tr>
@@ -42,22 +39,22 @@
         <td style="width: 120px"></td>
         <td style="width: 80px"></td>
         <td style="width: 80px"></td>
-        <td  class="table-warning" style="width: 80px">Sub total:</td>
-        <td  class="table-warning" style="width: 80px">{{$ventas[0]->subtotal}}</td>
+        <td   style="width: 80px">Sub total:</td>
+        <td   style="width: 80px">{{$ventas[0]->subtotal}}</td>
     </tr>
     <tr>
         <td style="width: 120px"></td>
         <td style="width: 80px"></td>
         <td style="width: 80px"></td>
-        <td  class="table-warning" style="width: 80px">Iva:</td>
-        <td  class="table-warning" style="width: 80px">{{$ventas[0]->total_iva}}</td>
+        <td   style="width: 80px">Iva:</td>
+        <td   style="width: 80px">{{$ventas[0]->total_iva}}</td>
     </tr>
     <tr>
-        <tH style="width: 120px"></tH>
-        <tH style="width: 80px"></tH>
-        <tH style="width: 80px"></tH>
-        <tH class="table-secondary" style="width: 80px">Total:</tH>
-        <tH class="table-secondary" style="width: 80px">{{$ventas[0]->total}}</tH>
+        <td style="width: 120px"></td>
+        <td style="width: 80px"></td>
+        <td style="width: 80px"></td>
+        <td  style="width: 80px"><b> Total:</b></td>
+        <td  style="width: 80px">{{$ventas[0]->total}}</td>
     </tr>
 </table>
  <br>  

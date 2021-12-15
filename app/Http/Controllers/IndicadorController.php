@@ -7,11 +7,10 @@ use Illuminate\Support\Facades\DB;
 
 class IndicadorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     public function index($type=null)
     {
         $ganancia = DB::select("select sum(ganancias) as ganancia from  v_ganancias");
@@ -20,11 +19,6 @@ class IndicadorController extends Controller
         return view('/indicadores/index', ['indicadorC'=>$indicadorC->toArray(), 'indicadorV'=>$indicadorV->toArray(), 'type'=>$type, 'ganancia'=>$ganancia]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function ganancias()
     {
         $ganancias = DB::table('v_ganancias')->get();
@@ -32,12 +26,6 @@ class IndicadorController extends Controller
         return view('/indicadores/ganancias', ['ganancias'=>$ganancias->toArray(), 'ganancia'=>$ganancia ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function entrefechas(Request $request)
     {
         $this->validate($request, [
@@ -73,7 +61,6 @@ class IndicadorController extends Controller
         return redirect('/indicadores/{entrefechas}');
 
     }
-
 
     public function hoy()
     {

@@ -6,6 +6,9 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
+use App\Http\ViewComposer\TiposPagos;
+use App\Http\ViewComposer\DatosProveedores;
+use App\Http\ViewComposer\DatosClientes;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,11 +31,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
-        View::composer('*', 'App\Http\ViewComposer\TiposPagos');
+        View::composer(['/compras/create', 'compras.update', 'ventas.update', '/ventas/create'], TiposPagos::class);
 
-        View::composer('*', 'App\Http\ViewComposer\DatosProveedores');
+        View::composer(['/compras/create', 'compras.update'], DatosProveedores::class);
 
-        View::composer('*', 'App\Http\ViewComposer\DatosClientes');
+        View::composer(['layouts.app','/ventas/create', 'ventas.update'], DatosClientes::class);
 
         Paginator::useBootstrap();
     }

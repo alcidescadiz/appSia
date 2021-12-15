@@ -28,11 +28,12 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 // compras
 Route::get('/compras', [App\Http\Controllers\CompraController::class, 'index'])->name('compras');
-Route::get('/facturac', [App\Http\Controllers\CompraController::class, 'show']);
+Route::get('/compras.create', [App\Http\Controllers\CompraController::class, 'show']);
 Route::post('/compras', [App\Http\Controllers\CompraController::class, 'store']);
 Route::delete('compras/{id}/edit', [App\Http\Controllers\CompraController::class, 'compra_destroy']);
-Route::put('comprase/{id}',  [App\Http\Controllers\CompraController::class, 'edit']);
+Route::put('compras/{id}',  [App\Http\Controllers\CompraController::class, 'edit'])->name('compras.edit');
 Route::put('comprase/{id}/edit',  [App\Http\Controllers\CompraController::class, 'update']);
+// detalles compras
 Route::post('/detalles', [App\Http\Controllers\CompraController::class, 'detallestore']);
 Route::delete('detalles/{id}', [App\Http\Controllers\CompraController::class, 'detalledestroy']);
 Route::post('/detallesedit', [App\Http\Controllers\CompraController::class, 'detallesedit']);
@@ -51,6 +52,7 @@ Route::post('/ventas', [App\Http\Controllers\VentaController::class, 'store']);
 Route::delete('ventas/{id}/edit', [App\Http\Controllers\VentaController::class, 'venta_destroy']);
 Route::put('ventase/{id}',  [App\Http\Controllers\ventaController::class, 'edit']);
 Route::put('ventase/{id}/edit',  [App\Http\Controllers\VentaController::class, 'update']);
+// detalles ventas
 Route::post('/detallesv', [App\Http\Controllers\VentaController::class, 'detallestore']);
 Route::post('/detallesvedit', [App\Http\Controllers\VentaController::class, 'detallesedit']);
 Route::delete('detallesv/{id}', [App\Http\Controllers\VentaController::class, 'detalledestroy']);
@@ -81,10 +83,10 @@ Route::post('/detallescompuestosedit', [App\Http\Controllers\CompuestoController
 Route::delete('detallescompuestosedit/{id}', [App\Http\Controllers\CompuestoController::class, 'editdetalecompuestodestroy']);
 
 //Route Hooks - Do not delete//
-	Route::view('tipospagos', 'livewire.tipospagos.index')->middleware('auth');
-	Route::view('productos', 'livewire.productos.index')->middleware('auth');
-	Route::view('clientes', 'livewire.clientes.index')->middleware('auth');
-	Route::view('proveedores', 'livewire.proveedores.index')->middleware('auth');
+Route::view('tipospagos', 'livewire.tipospagos.index')->middleware('auth');
+Route::view('productos', 'livewire.productos.index')->middleware('auth');
+Route::view('clientes', 'livewire.clientes.index')->middleware('auth');
+Route::view('proveedores', 'livewire.proveedores.index')->middleware('auth');
 
 // imprimir facturas
 Route::get("print/{id}", function ($id) {

@@ -117,7 +117,7 @@
 
                     <a href="{{ url('/compras') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond">Compras</a> 
 
-                    <a href="{{ url('/facturac') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond">Factura Compra</a> 
+                    <a href="{{ url('/compras.create') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond">Factura Compra</a> 
 
                     <a href="{{ url('/ventas') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond">Ventas</a> 
 

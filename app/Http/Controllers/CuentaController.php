@@ -8,11 +8,9 @@ use Illuminate\Support\Facades\DB;
 
 class CuentaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function __construct(){
+        $this->middleware('auth');
+    }
     public function pagar()
     {
         $pagar = DB::table('v_cuentas_por_pagar')->get();
@@ -23,30 +21,16 @@ class CuentaController extends Controller
         $cobrar = DB::table('v_cuentas_por_cobrar')->get();
         return view('/cuentas/cobrar', ['cobrar'=>$cobrar->toArray()]);
     }
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Cuenta  $cuenta
-     * @return \Illuminate\Http\Response
-     */
     public function updatepagar(Request $request,$id)
     {
-        DB::table('cuentas')
-        ->where('id', $id)
-        ->update([
-            'estatus' => 'cancelado',
-        ]);
-    return redirect('/pagar');
+        DB::table('cuentas')->where('id', $id)
+        ->update([ 'estatus' => 'cancelado']);
+        return redirect('/pagar');
     }
     public function updatecobrar(Request $request,$id)
     {
-        DB::table('cuentas')
-        ->where('id', $id)
-        ->update([
-            'estatus' => 'cancelado',
-        ]);
-    return redirect('/cobrar');
+        DB::table('cuentas') ->where('id', $id)
+        ->update(['estatus' => 'cancelado']);
+        return redirect('/cobrar');
     }
-
 }

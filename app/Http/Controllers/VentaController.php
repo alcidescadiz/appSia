@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\FacturaMail;
 use App\Models\Venta;
 use App\Models\DetalleVenta;
+use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use vendor\autoload;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -17,37 +20,15 @@ class VentaController extends Controller
     {
         $this->middleware('auth');
     }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
-       
-        $ventas = DB::table('v_ventas')->paginate(5);
+        $ventas = DB::table('v_ventas')->paginate(15);
         return view('/ventas/index', ['ventas'=>$ventas]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        
         $this->validate($request, [
             'fecha' => 'required',
             'id_cliente' => 'required',
@@ -56,10 +37,16 @@ class VentaController extends Controller
             'subtotal' => 'required|numeric',
             'total' => 'required|numeric',
             ]);
-    
         Venta::create($request->all());
-
-        session()->flash('message', 'La venta ha sido registrada');
+        if( @fsockopen('www.google.com', 80)) {// ¿hay internet?
+            $ventas= DB::select("select * from v_ventas where id = ?", [$request->get('id')]);
+            $detalles= DB::select("select * from v_detalles_ventas where id_ventas = ?", [$request->get('id')]);
+            $email_cliente= DB::select("select email from clientes where id = ?", [$request->get('id_cliente')]);
+            Mail::to($email_cliente)->send(new FacturaMail($ventas, $detalles));
+            session()->flash('message', 'La venta ha sido registrada');
+        }else{
+            session()->flash('message', 'La venta ha sido registrada, No se ha enviado el email por falla a conexión');
+        }
         return redirect('ventas');
     }
     public function detallestore(Request $request)
@@ -71,17 +58,12 @@ class VentaController extends Controller
             'subtotal' => 'required|numeric',
         ]);
         $id_detalle = $request->get('id_productos');
-        //dd($id_detalle);
-        $busca = DB::select("select id, gravable, costo from productos where nombre= '$id_detalle'");
-        $busca[0]->id;
-        $busca[0]->gravable;
-        $busca[0]->costo;
+        $busca = DB::select("select id, gravable, costo from productos where nombre= ?", [$id_detalle]);
         if ($busca[0]->gravable === 'si') {
             $monto_iva =$request->get('precio_venta')*$request->get('cantidad') * 0.16;
         }else {
             $monto_iva = 0;
         }
-    
         DetalleVenta::create([
             'id_productos'=>$busca[0]->id,
             'costo'=>$busca[0]->costo,
@@ -105,16 +87,12 @@ class VentaController extends Controller
                 'subtotal' => 'required|numeric',
             ]);
             $id_detalle = $request->get('id_productos');
-            //dd($id_detalle);
-            $busca = DB::select("select id, gravable, costo from productos where nombre= '$id_detalle'");
-            $busca[0]->id;
-            $busca[0]->gravable;
+            $busca = DB::select("select id, gravable, costo from productos where nombre= ?", [$id_detalle]);
             if ($busca[0]->gravable === 'si') {
                 $monto_iva =$request->get('precio_venta')*$request->get('cantidad') * 0.16;
             }else {
                 $monto_iva = 0;
             }
-        
             DetalleVenta::create([
                 'id_productos'=>$busca[0]->id,
                 'costo'=>$busca[0]->costo,
@@ -126,11 +104,10 @@ class VentaController extends Controller
             ]);
             session()->flash('message', 'Detalle registrado');
         }
-            // factura 
-            // coodigo proveedores productos y tipo de pago:
+            // retorno a la factura d eedicion
             $id= $request->get('id_ventas');
             $productos = DB::table('productos')->get();  
-            $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_ventas where id_ventas = '$id'");
+            $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_ventas where id_ventas = ?", [$id]);
             if ($totales[0]->tiva===null) {
                 $tiva= 0;
                 $tsubtotal= 0;
@@ -140,23 +117,13 @@ class VentaController extends Controller
                 $tsubtotal= $totales[0]->tsubtotal;
                 $ttotal= $totales[0]->ttotal;
             }
-            $detalles= DB::select("SELECT d.id, d.id_ventas, p.nombre, d.precio_venta, d.cantidad, d.iva, d.subtotal, d.subtotal, d.estatus  
-                        FROM detalle_ventas d
-                        INNER join productos p on d.id_productos = p.id
-                        where d.id_ventas = '$id' and d.estatus='activo'");
-    
-            $ventas= DB::select("SELECT * FROM v_ventas where id = '$id'");
+            $detalles= DB::table('v_detalles_ventas')->where('id_ventas', $id)->get();
+            $ventas= DB::select("SELECT * FROM v_ventas where id = ?", [$id]);
             return view('ventas/update',['ventas'=>$ventas, 'id'=>$id, 'productos'=>$productos->toArray(),'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
         
-        
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Venta  $venta
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Venta $venta) 
+
+    public function show(Venta $venta) // mostar factura
     {
         // factura 
         // coodigo proveedores productos y tipo de pago:
@@ -168,7 +135,7 @@ class VentaController extends Controller
         }else {
             $idnew=1;
         }
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_ventas where id_ventas = '$idnew'");
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_ventas where id_ventas = ?", [$idnew]);
         if ($totales[0]->tiva===null) {
             $tiva= 0;
             $tsubtotal= 0;
@@ -179,29 +146,15 @@ class VentaController extends Controller
             $ttotal= $totales[0]->ttotal;
         }
         $productos = DB::table('productos')->get();  
-        $ventas = DB::table('ventas')
-                    ->where('estatus', 'activo')
-                    ->get();
-        $detalles= DB::select("SELECT d.id, d.id_ventas, p.nombre, d.precio_venta, d.cantidad, d.iva, d.subtotal, d.subtotal, d.estatus  
-        FROM detalle_ventas d
-        INNER join productos p on d.id_productos = p.id
-        where d.id_ventas = '$idnew' and d.estatus='activo'");
-
-        return view('/ventas/create', [ 'productos'=>$productos->toArray(),'ventas'=>$ventas->toArray(),'idnew'=>$idnew, 'detalles'=>$detalles, 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal]);
+        $detalles= DB::table('v_detalles_ventas')->where('id_ventas', $idnew)->get();
+        return view('/ventas/create', [ 'productos'=>$productos->toArray(),'idnew'=>$idnew, 'detalles'=>$detalles, 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal]);
     }
 
-    
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Compra  $compra
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     { 
         $productos = DB::table('productos')->get();  
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_ventas where id_ventas = '$id'");
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_ventas where id_ventas = ?", [$id]);
         if ($totales[0]->tiva===null) {
             $tiva= 0;
             $tsubtotal= 0;
@@ -211,30 +164,18 @@ class VentaController extends Controller
             $tsubtotal= $totales[0]->tsubtotal;
             $ttotal= $totales[0]->ttotal;
         }
-        $detalles= DB::select("SELECT d.id, d.id_ventas, p.nombre, d.precio_venta, d.cantidad, d.iva, d.subtotal, d.subtotal, d.estatus  
-                    FROM detalle_ventas d
-                    INNER join productos p on d.id_productos = p.id
-                    where d.id_ventas = '$id' and d.estatus='activo'");
-
-        $ventas= DB::select("SELECT * FROM v_ventas where id = '$id'");
-
+        $detalles= DB::table('v_detalles_ventas')->where('id_ventas', $id)->get();
+        $ventas= DB::select("SELECT * FROM v_ventas where id = ?", [$id]);
         return view('ventas/update',['ventas'=>$ventas, 'id'=>$id, 'productos'=>$productos->toArray(),'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Compra  $compra
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request)
     {
         if ($request->get('fecha')=== null) {
             session()->flash('message', 'Verifique que todos los datos esten completos');
             $productos = DB::table('productos')->get();  
             $id=$request->get('id');
-            $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_ventas where id_ventas = '$id'");
+            $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_ventas where id_ventas = ?", [$id]);
             if ($totales[0]->tiva===null) {
                 $tiva= 0;
                 $tsubtotal= 0;
@@ -244,13 +185,8 @@ class VentaController extends Controller
                 $tsubtotal= $totales[0]->tsubtotal;
                 $ttotal= $totales[0]->ttotal;
             }
-            $detalles= DB::select("SELECT d.id, d.id_ventas, p.nombre, d.precio_venta, d.cantidad, d.iva, d.subtotal, d.subtotal, d.estatus  
-                        FROM detalle_ventas d
-                        INNER join productos p on d.id_productos = p.id
-                        where d.id_ventas = '$id' and d.estatus='activo'");
-
-            $ventas= DB::select("SELECT * FROM v_ventas where id ='$id'");
-
+            $detalles= DB::table('v_detalles_ventas')->where('id_ventas', $id)->get();
+            $ventas= DB::select("SELECT * FROM v_ventas where id =?", [$id]);
             return view('ventas/update',['ventas'=>$ventas, 'id'=>$id, 'productos'=>$productos->toArray(),'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
         } else {
             $this->validate($request, [
@@ -276,12 +212,6 @@ class VentaController extends Controller
         
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Venta  $venta
-     * @return \Illuminate\Http\Response
-     */
     public function venta_destroy($id)
     {
         DB::table('ventas')
@@ -294,7 +224,13 @@ class VentaController extends Controller
             ->update([
                 'estatus' => 'eliminado',
             ]);
-        session()->flash('message', 'La venta ha sido eliminda');
+        DB::table('cuentas')
+            ->where('codigo', $id)
+            ->where('tipo', 'ventas')
+            ->update([
+                'estatus' => 'cancelado',
+            ]);
+        session()->flash('message', 'La venta ha sido eliminada');
         return redirect('/ventas');
     }
     public function detalledestroy($id)
@@ -304,13 +240,13 @@ class VentaController extends Controller
     }
     public function detalledestroyedit($id)
     {
-        $id_ventas = DB::select("SELECT id, id_ventas FROM detalle_ventas where id = '$id'");
+        $id_ventas = DB::select("SELECT id, id_ventas FROM detalle_ventas where id = ?", [$id]);
         $id_ventas= $id_ventas[0]->id_ventas;
         DB::table('detalle_ventas')->delete($id);
        // factura 
         // coodigo proveedores productos y tipo de pago: 
         $productos = DB::table('productos')->get();  
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_ventas where id_ventas = '$id_ventas'");
+        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_ventas where id_ventas = ?", [$id_ventas]);
         if ($totales[0]->tiva===null) {
             $tiva= 0;
             $tsubtotal= 0;
@@ -320,13 +256,8 @@ class VentaController extends Controller
             $tsubtotal= $totales[0]->tsubtotal;
             $ttotal= $totales[0]->ttotal;
         }
-        $detalles= DB::select("SELECT d.id, d.id_ventas, p.nombre, d.precio_venta, d.cantidad, d.iva, d.subtotal, d.subtotal, d.estatus  
-                    FROM detalle_ventas d
-                    INNER join productos p on d.id_productos = p.id
-                    where d.id_ventas = '$id_ventas' and d.estatus='activo'");
-
-        $ventas= DB::select("SELECT * FROM v_ventas where id = '$id_ventas'");
-
+        $detalles= DB::table('v_detalles_ventas')->where('id_ventas', $id_ventas)->get();
+        $ventas= DB::select("SELECT * FROM v_ventas where id = ?", [$id_ventas]);
         return view('ventas/update',['ventas'=>$ventas, 'id'=>$id_ventas, 'productos'=>$productos->toArray(), 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
     }
 
@@ -362,9 +293,7 @@ class VentaController extends Controller
 
         //consultar en base de datos segun filtros
         $ventas = DB::table('v_ventas')->get();
-
-   
-        
+       
         for ($i = 0; $i < count($ventas); $i++) {
   
             //mostrar información de los bienes filtrados en la celdas
@@ -430,8 +359,6 @@ class VentaController extends Controller
         //consultar en base de datos segun filtros
         $dventas = DB::table('v_detalles_ventas')->get();
 
-   
-        
         for ($i = 0; $i < count($dventas); $i++) {
   
             //mostrar información de los bienes filtrados en la celdas

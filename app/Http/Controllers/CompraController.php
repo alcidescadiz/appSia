@@ -17,31 +17,16 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class CompraController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(){
         $this->middleware('auth');
     }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
+    
+    public function index(){
         $compras = DB::table('v_compras')->paginate(5);
         return view('/compras/index', ['compras'=>$compras]);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        
-        $this->validate($request, [
+    public function store(Request $request){
+       return  $this->validate($request, [
             'fecha' => 'required',
             'id_proveedor' => 'required',
             'id_tipo_pago' => 'required',
@@ -49,7 +34,6 @@ class CompraController extends Controller
             'subtotal' => 'required|numeric',
             'total' => 'required|numeric',
             ]);
-    
         Compra::create([
                 'fecha' => $request->get('fecha'),
                 'id_proveedor' => $request->get('id_proveedor'),
@@ -62,8 +46,7 @@ class CompraController extends Controller
         session()->flash('message', 'La compra ha sido registrada');
         return redirect('compras');
     }
-    public function detallestore(Request $request)
-    {
+    public function detallestore(Request $request){
         $this->validate($request, [
             'id_productos' => 'required',
             'costo' => 'required|numeric',
@@ -81,7 +64,6 @@ class CompraController extends Controller
         }else {
             $monto_iva = 0;
         }
-        session()->flash('message', 'Detalle a su compra ha sido agregado'); 
         DetalleCompra::create([
             'id_productos'=>$busca[0]->id,
             'costo' => $request->get('costo'),
@@ -90,9 +72,8 @@ class CompraController extends Controller
             'subtotal' => $request->get('subtotal'),
             'id_compras' => $request->get('id_compras')
         ]);
-
-
-        return redirect('/facturac');
+        session()->flash('message', 'Detalle a su compra ha sido agregado'); 
+        return redirect('/compras.create');
     }
 
     public function detallesedit(Request $request)
@@ -116,7 +97,6 @@ class CompraController extends Controller
             }else {
                 $monto_iva = 0;
             }
-        
             DetalleCompra::create([
                 'id_productos'=>$busca[0]->id,
                 'costo' => $request->get('costo'),
@@ -141,28 +121,13 @@ class CompraController extends Controller
             $tsubtotal= $totales[0]->tsubtotal;
             $ttotal= $totales[0]->ttotal;
         }
-        $detalles = DB::table('v_detalles_compras')
-        ->where('id_compras', $id)
-        ->get();
-
+        $detalles = DB::table('v_detalles_compras')->where('id_compras', $id)->get();
         $compras= DB::select("SELECT * FROM v_compras where id =?", [$id]);
-
         return view('compras/update',['compras'=>$compras, 'id'=>$id, 'productos'=>$productos->toArray(), 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
-
-
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Compra  $compra
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Compra $compra) 
-    {
+
+    public function show(){
         // factura 
-        // coodigo proveedores productos y tipo de pago:
-        //SELECT IDENT_CURRENT('table_name')
-        //$codigo= DB::select("select last_insert_id(id) as codigo from compras");
         $codigo= DB::select("SELECT `AUTO_INCREMENT` as codigo FROM  INFORMATION_SCHEMA.TABLES
         WHERE TABLE_SCHEMA = 'appsialaravel'
         AND   TABLE_NAME   = 'compras'");
@@ -182,23 +147,10 @@ class CompraController extends Controller
             $ttotal= $totales[0]->ttotal;
         }  
         $productos = DB::table('productos')->get();  
-        $compras = DB::table('compras')
-                    ->where('estatus', 'activo')
-                    ->get();
-        $detalles = DB::table('v_detalles_compras')
-                    ->where('id_compras', $idnew)
-                    ->get();
-        return view('/compras/create', [ 'productos'=>$productos->toArray(),'compras'=>$compras->toArray(), 'idnew'=>$idnew, 'detalles'=>$detalles, 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal]);
+        $detalles = DB::table('v_detalles_compras')->where('id_compras', $idnew)->get();
+        return view('/compras.create', [ 'productos'=>$productos->toArray(), 'idnew'=>$idnew, 'detalles'=>$detalles, 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal]);
     }
-
     
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Compra  $compra
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         $productos = DB::table('productos')->get();  
@@ -213,12 +165,8 @@ class CompraController extends Controller
             $tsubtotal= $totales[0]->tsubtotal;
             $ttotal= $totales[0]->ttotal;
         }
-        $detalles = DB::table('v_detalles_compras')
-                    ->where('id_compras', $id)
-                    ->get();
-
+        $detalles = DB::table('v_detalles_compras')->where('id_compras', $id)->get();
         $compras= DB::select("SELECT * FROM v_compras where id =?", [$id]);
-
         return view('compras/update',['compras'=>$compras, 'id'=>$id, 'productos'=>$productos->toArray(), 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
     }
 
@@ -241,7 +189,7 @@ class CompraController extends Controller
                'total' => 'required|numeric',
                ]);
                DB::table('compras')
-                   ->where('id',$request->get('id'),)
+                   ->where('id',$request->get('id'))
                    ->update([
                        'fecha' => $request->get('fecha'),
                        'id_proveedor' => $request->get('id_proveedor'),
@@ -250,6 +198,7 @@ class CompraController extends Controller
                        'subtotal' => $request->get('subtotal'),
                        'total' => $request->get('total'),
                    ]);
+               
                session()->flash('message', 'Compra ha sido editada');
                return redirect('compras');
        }
@@ -273,14 +222,20 @@ class CompraController extends Controller
             ->update([
                 'estatus' => 'eliminado',
             ]);
-        session()->flash('message', 'La compra ha sido eliminda');
+        DB::table('cuentas')
+            ->where('codigo', $id)
+            ->where('tipo', 'compras')
+            ->update([
+                'estatus' => 'cancelado',
+            ]);
+        session()->flash('message', 'La compra ha sido eliminada');
         return redirect('/compras');
     }
     public function detalledestroy($id)
     {
         DB::table('detalle_compras')->delete($id);
         session()->flash('message', 'Detalle eliminado');
-        return redirect('/facturac');
+        return redirect('/compras');
     }
     public function detalledestroyedit($id)
     {
@@ -301,16 +256,12 @@ class CompraController extends Controller
             $tsubtotal= $totales[0]->tsubtotal;
             $ttotal= $totales[0]->ttotal;
         }
-        $detalles = DB::table('v_detalles_compras')
-                    ->where('id_compras', $id)
-                    ->get();
-
+        $detalles = DB::table('v_detalles_compras')->where('id_compras', $id)->get();
         $compras= DB::select("SELECT * FROM v_compras where id =?", [$id]);
         session()->flash('message', 'Detalle eliminado');
         return view('compras/update',['compras'=>$compras, 'id'=>$id, 'productos'=>$productos->toArray(), 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
     
     }
-
     public function export(){
         $documento = new Spreadsheet();
         $documento

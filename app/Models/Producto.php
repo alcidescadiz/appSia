@@ -15,20 +15,11 @@ class Producto extends Model
 
     protected $fillable = ['codigo','nombre','costo','porcentage_ganancia','precio_venta','gravable','tipo','foto', 'estatus'];
 	
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function detalleCompras()
-    {
-        return $this->hasMany('App\Models\DetalleCompra', 'id_productos', 'id');
+    public function detalle_compras(){
+        return $this->hasOne(DetalleCompra::class, 'id_productos');
     }
-    
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function detalleVentas()
-    {
-        return $this->hasMany('App\Models\DetalleVenta', 'id_productos', 'id');
-    }
+    public function detalle_ventas(){
+        return $this->hasMany(DetalleVenta::class, 'id_productos');
+    }  
     
 }

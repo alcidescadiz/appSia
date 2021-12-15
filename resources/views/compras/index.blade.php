@@ -56,7 +56,7 @@
                     <td data-titulo="Subtotal: " class="subtotal">{{$item->subtotal}}</td>
                     <td data-titulo="Total" >{{$item->total}}</td>
                     <td style="text-align: center">
-                        <form method="POST" action="{{ url("comprase/{$item->id}") }}">
+                        <form method="POST" action="{{ route("compras.edit", $item->id) }}">
                             @csrf
                             @method('PUT')
                             <button class="btn btn-primary" type="submit">Editar</button>

@@ -15,5 +15,11 @@ class DetalleVenta extends Model
 
     protected $fillable = ['id_ventas','id_productos', 'costo', 'precio_venta','cantidad','subtotal', 'iva', 'estatus'];
 
+    public function ventas(){
+        return $this->belongsTo(Venta::class, 'id');
+    }
+    public function productos(){
+        return $this->belongsToMany(Producto::class, 'id');
+    }
 
 }
