@@ -3,25 +3,28 @@
 @section('content')
 
 
-
 <div class="container">
     <div>
         <h2><i>Registro de compras</i></h2>
-        <form action="{{URL::to('/export')}}" method="post">
-            {!! csrf_field() !!}
-            <button type="submit" class='btn btn-info'>Exportar Compras a Excel</button>
-        </form>
-        <br>
-        <form action="{{URL::to('/exportdetalles')}}" method="post">
-            {!! csrf_field() !!}
-            <button type="submit" class='btn btn-info'>Exportar Detalles de Compras a Excel</button>
-        </form>
+        <table >
+            <td >
+                <form action="{{URL::to('/export')}}" method="post" style="margin:5px; padding: 5px">
+                    {!! csrf_field() !!}
+                    <button type="submit" class='btn btn-info'>Exportar Compras a Excel</button>
+                </form>
+            </td>
+            <td >
+                <form action="{{URL::to('/exportdetalles')}}" method="post" style="margin:5px; padding: 5px">
+                    {!! csrf_field() !!}
+                    <button type="submit" class='btn btn-info'>Exportar Detalles de Compras a Excel</button>
+                </form>
+            </td>
+        </tr>
+        </table>
     </div>
-    
-    <br>
 
     @if (session()->has('message'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert {{ Session::get('alert-class', 'alert-success')}} alert-dismissible fade show" role="alert">
         {{ session('message') }} 
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -29,7 +32,6 @@
       </div>
     @endif
 </div>
-    <br>
 
 <div id="tablacopras" class="container">
     <table class="table table-striped">
@@ -58,12 +60,12 @@
                     <td style="text-align: center">
                         <form method="POST" action="{{ route("compras.edit", $item->id) }}">
                             @csrf
-                            @method('PUT')
+                            @method('POST')
                             <button class="btn btn-primary" type="submit">Editar</button>
                         </form>
                     </td>
                     <td style="text-align: center">
-                        <form method="POST" action="{{ url("compras/{$item->id}/edit") }}">
+                        <form method="POST" action="{{ url("compras/{$item->id}") }}">
                             @csrf
                             @method('DELETE')
 

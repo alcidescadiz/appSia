@@ -40,8 +40,8 @@
         </div>
         <div class="form-group">
             <label for="">Clientes</label>
-            <select  class="form-control" name="id_cliente" id="">
-                <option value="{{$ventas[0]->id_cliente}}">{{$ventas[0]->nombre}}</option>
+            <select  class="form-control" name="cliente_id" id="">
+                <option value="{{$ventas[0]->cliente_id}}">{{$ventas[0]->nombre}}</option>
                 @foreach ($Lclientes as $item)
                 <option value="{{$item->id}}">{{$item->nombre}}</option>
                 @endforeach
@@ -49,8 +49,8 @@
         </div>
         <div class="form-group">
             <label for="">Tipo de Pago</label>
-            <select  class="form-control" name="id_tipo_pago" id="">
-                <option value="{{$ventas[0]->id_tipo_pago}}">{{$ventas[0]->tipo}}</option>
+            <select  class="form-control" name="tipospago_id" id="">
+                <option value="{{$ventas[0]->tipospago_id}}">{{$ventas[0]->tipo}}</option>
                 @foreach ($Ltipospagos as $item)
                 <option value="{{$item->id}}">{{$item->tipo}}</option>
                 @endforeach
@@ -58,15 +58,15 @@
         </div>
         <div class="form-group">
             <label for="">Total iva</label>
-            <input type="number" step="0.01" class="form-control" name="total_iva" value="{{$tiva}}" readonly>
+            <input type="number" step="0.01" class="form-control" name="total_iva" value="{{$totales[0]}}" readonly>
         </div>
         <div class="form-group">
             <label for="">Subtotal</label>
-            <input type="number" step="0.01" class="form-control" name="subtotal" value="{{$tsubtotal}}" readonly>
+            <input type="number" step="0.01" class="form-control" name="subtotal" value="{{$totales[1]}}" readonly>
         </div>
         <div class="form-group">
             <label for="">Total</label>
-            <input type="number" step="0.01" class="form-control" name="total" value="{{$ttotal}}" readonly>
+            <input type="number" step="0.01" class="form-control" name="total" value="{{$totales[2]}}" readonly>
         </div>
         <input name="" id="" class="btn btn-primary" type="submit" value="Guardar">
 
@@ -97,7 +97,7 @@
                                     @endforeach
                                    
                                 </select>
-                                <input type="hidden" name="id_productos" id="productocopia">
+                                <input type="hidden" name="producto_id" id="productocopia">
                             </div>
                         </td>
                         <td data-titulo="Precio de venta:">
@@ -110,7 +110,7 @@
                             <input readonly type="number" name="subtotal" step="0.01" id="subtotal" style="width: 100px" class="form-control">
                         </td>
                         <td>
-                        <input type="hidden" name="id_ventas" value="{{$id}}">
+                        <input type="hidden" name="venta_id" value="{{$id}}">
                         <input name="" id="" class="btn btn-success" type="submit" value="Agregar">
                         </td>
                     </tr>

@@ -15,15 +15,15 @@ class CreateDetalleVentasTable extends Migration
     {
         Schema::create('detalle_ventas', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('id_ventas')->unsigned();
-            $table->integer('id_productos')->unsigned();
+            $table->integer('venta_id')->unsigned();
+            $table->integer('producto_id')->unsigned();
             $table->double('costo', 8, 2);
             $table->double('precio_venta', 8, 2);
             $table->double('cantidad', 8, 2);
             $table->double('iva', 8, 2);
             $table->double('subtotal', 8, 2);
             $table->enum('estatus',['activo','eliminado'])->default('activo');
-            $table->foreign('id_productos')->references('id')->on('productos');
+            $table->foreign('producto_id')->references('id')->on('productos');
             $table->timestamps();
         });
     }

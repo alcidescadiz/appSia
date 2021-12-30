@@ -9,13 +9,16 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
         
         <!-- Scripts -->
+        <script src="{{ asset('js/jquery-3.5.1.js') }}"></script>  
+        <script src="{{ asset('js/jquery.slim.min.js') }}"></script>
+    
+        <link rel="stylesheet" href="{{ asset('css/bootstrap.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/dataTables.bootstrap4.min.css') }}">
+        
      
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
         <script>
         jQuery(document).ready(function($){
             $("#menu-toggle").click(function(e) {
@@ -95,7 +98,6 @@
 
         }
         </style> 
-        @livewireStyles  
         @laravelPWA 
     </head>
     <body>
@@ -107,17 +109,14 @@
             @auth()
                 <!--Nav Bar Hooks - Do not delete!!-->
 		               
-                    <a href="{{ url('/clientes') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond">Clientes</a> 
-
-                    <a href="{{ url('/proveedores') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond"> Proveedores</a> 
-
-                    <a href="{{ url('/tipospagos') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond"> Tipospagos</a> 
-
+                     
+                    <a href="{{ route('tablas')}}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond"> Admnistrador</a> 
+                    
                     <a href="{{ url('/productos') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond"> Productos</a> 
 
                     <a href="{{ url('/compras') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond">Compras</a> 
 
-                    <a href="{{ url('/compras.create') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond">Factura Compra</a> 
+                    <a href="{{ route('compras.create') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond">Factura Compra</a> 
 
                     <a href="{{ url('/ventas') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond">Ventas</a> 
 
@@ -132,6 +131,8 @@
                     <a href="{{ url('/cobrar') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond"> Cuentas por cobrar</a> 
 
                     <a href="{{ url('/ganancias') }}" class="list-group-item list-group-item-action bg-dark" style="color: blanchedalmond"> Ganancias</a> 
+                    
+                    
  
                     @endauth()
                 </div>
@@ -206,15 +207,8 @@
         <main class="py-2">
             @yield('content')
         </main>
-        @livewireScripts
-        <script type="text/javascript">
-            window.livewire.on('closeModal', () => {
-                $('#exampleModal').modal('hide');
-            });
-            window.livewire.on('closeModalupdate', () => {
-                $('#updateModal').modal('hide');
-            });
-        </script>
-
+        <script src="{{ asset('js/jquery.dataTables.min.js') }}"></script>
+        <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+        <script src="{{ asset('js/dataTables.bootstrap4.min.js') }}"></script>
     </body>
 </html>

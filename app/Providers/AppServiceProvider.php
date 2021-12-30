@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\View;
 use App\Http\ViewComposer\TiposPagos;
 use App\Http\ViewComposer\DatosProveedores;
 use App\Http\ViewComposer\DatosClientes;
+use App\Http\ViewComposer\TotalCuentas;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,7 +36,9 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer(['/compras/create', 'compras.update'], DatosProveedores::class);
 
-        View::composer(['layouts.app','/ventas/create', 'ventas.update'], DatosClientes::class);
+        View::composer(['/ventas/create', 'ventas.update'], DatosClientes::class);
+
+        View::composer(['layouts.app'], TotalCuentas::class);
 
         Paginator::useBootstrap();
     }

@@ -38,21 +38,21 @@ class IndicadorController extends Controller
         if ($fecha1<$fecha2) {
             $indicadorC = DB::select("SELECT t.id, t.tipo, t.estatus, sum(c.total) as total
             FROM tipospagos t
-            INNER join compras c on t.id=c.id_tipo_pago
+            INNER join compras c on t.id=c.tipospago_id
             where c.estatus= 'activo'
             and c.fecha >= ? and c.fecha <= ?
             group by t.tipo", [$fecha1, $fecha2]);
 
             $indicadorV = DB::select("SELECT t.id, t.tipo, t.estatus, sum(v.total) as total
             FROM tipospagos t
-            INNER join ventas v on t.id=v.id_tipo_pago
+            INNER join ventas v on t.id=v.tipospago_id
             where v.estatus= 'activo'
             and v.fecha >= ? and v.fecha <= ?
             group by t.tipo", [$fecha1, $fecha2]);
 
             $ganancias = DB::select("SELECT sum(vdv.ganancia)as ganancia
             FROM v_detalles_ventas vdv
-            INNER JOIN v_ventas vv on vv.id= vdv.id_ventas
+            INNER JOIN v_ventas vv on vv.id= vdv.venta_id
             WHERE vv.fecha>=? and vv.fecha <= ?", [$fecha1, $fecha2]);
             
             return view('/indicadores/entrefechas', ['indicadorC'=>$indicadorC, 'indicadorV'=>$indicadorV, 'fecha1'=>$fecha1, 'fecha2'=>$fecha2, 'ganancias'=>$ganancias]);
@@ -68,21 +68,21 @@ class IndicadorController extends Controller
 
         $indicadorC = DB::select("SELECT t.id, t.tipo, t.estatus, sum(c.total) as total
         FROM tipospagos t
-        INNER join compras c on t.id=c.id_tipo_pago
+        INNER join compras c on t.id=c.tipospago_id
         where c.estatus= 'activo'
         and c.fecha = ?
         group by t.tipo", [$fecha1]);
 
         $indicadorV = DB::select("SELECT t.id, t.tipo, t.estatus, sum(v.total) as total
         FROM tipospagos t
-        INNER join ventas v on t.id=v.id_tipo_pago
+        INNER join ventas v on t.id=v.tipospago_id
         where v.estatus= 'activo'
         and v.fecha = ?
         group by t.tipo", [$fecha1]);
 
         $ganancias = DB::select("SELECT sum(vdv.ganancia)as ganancia
         FROM v_detalles_ventas vdv
-        INNER JOIN v_ventas vv on vv.id= vdv.id_ventas
+        INNER JOIN v_ventas vv on vv.id= vdv.venta_id
         WHERE vv.fecha= ?", [$fecha1]);
 
         return view('/indicadores/hoy', ['indicadorC'=>$indicadorC, 'indicadorV'=>$indicadorV, 'ganancias'=>$ganancias]);
@@ -96,21 +96,21 @@ class IndicadorController extends Controller
         $fecha1= $request->get('fecha1');
         $indicadorC = DB::select("SELECT t.id, t.tipo, t.estatus, sum(c.total) as total
         FROM tipospagos t
-        INNER join compras c on t.id=c.id_tipo_pago
+        INNER join compras c on t.id=c.tipospago_id
         where c.estatus= 'activo'
         and c.fecha = ?
         group by t.tipo", [$fecha1]);
 
         $indicadorV = DB::select("SELECT t.id, t.tipo, t.estatus, sum(v.total) as total
         FROM tipospagos t
-        INNER join ventas v on t.id=v.id_tipo_pago
+        INNER join ventas v on t.id=v.tipospago_id
         where v.estatus= 'activo'
         and v.fecha = ?
         group by t.tipo", [$fecha1]);
 
         $ganancias = DB::select("SELECT sum(vdv.ganancia)as ganancia
         FROM v_detalles_ventas vdv
-        INNER JOIN v_ventas vv on vv.id= vdv.id_ventas
+        INNER JOIN v_ventas vv on vv.id= vdv.venta_id
         WHERE vv.fecha= ?", [$fecha1]);
 
         return view('/indicadores/dia', ['indicadorC'=>$indicadorC, 'indicadorV'=>$indicadorV, 'ganancias'=>$ganancias, 'fecha1'=>$fecha1]);

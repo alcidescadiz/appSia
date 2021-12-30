@@ -16,14 +16,14 @@ class CreateVentasTable extends Migration
         Schema::create('ventas', function (Blueprint $table) {
             $table->increments('id');
             $table->date('fecha')->required();
-            $table->integer('id_cliente')->unsigned()->required();
-            $table->integer('id_tipo_pago')->unsigned()->required();
+            $table->integer('cliente_id')->unsigned()->required();
+            $table->integer('tipospago_id')->unsigned()->required();
             $table->double('total_iva', 8, 2)->required();
             $table->double('subtotal', 8, 2)->required();
             $table->double('total', 8, 2)->required();
             $table->enum('estatus',['activo','eliminado'])->default('activo');
-            $table->foreign('id_cliente')->references('id')->on('clientes');
-            $table->foreign('id_tipo_pago')->references('id')->on('tipospagos');
+            $table->foreign('cliente_id')->references('id')->on('clientes');
+            $table->foreign('tipospago_id')->references('id')->on('tipospagos');
             $table->timestamps();
         });
     }

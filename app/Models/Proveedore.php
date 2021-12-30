@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Compra;
 
 class Proveedore extends Model
 {
@@ -13,14 +14,28 @@ class Proveedore extends Model
 
     protected $table = 'proveedores';
 
+    protected $primaryKey = 'id';
+
     protected $fillable = ['rif','nombre','email','direccion','telefono','productos','estatus'];
 	
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function compras()
+    public function setNombreAttribute($value)
     {
-        return $this->hasMany('App\Models\Compra', 'id_proveedor', 'id');
+        $this->attributes['nombre']=strtoupper($value);
     }
-    
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['email']=strtolower($value);
+    }
+    public function setDireccionAttribute($value)
+    {
+        $this->attributes['direccion']=strtoupper($value);
+    }
+    public function setProductosAttribute($value)
+    {
+        $this->attributes['productos']=strtoupper($value);
+    }
+    public function getEstatusAttribute($value)
+    {
+        return strtoupper($value);
+    }
 }

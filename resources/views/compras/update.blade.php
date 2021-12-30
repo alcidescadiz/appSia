@@ -7,41 +7,41 @@
     <div class="row no-gutters">
 
     <div class="col-sm-6 col-md-4" >
-    @if (session()->has('message'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="width:90%; text-aling:center; margin 5px;">
-            {{ session('message') }} 
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="width:90%; text-aling:center; margin 5px;">
-            <ul style="text-aling:center;">
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+        @if (session()->has('message'))
+            <div class="alert {{ Session::get('alert-class', 'alert-success')}} alert-dismissible fade show" role="alert" style="width:90%; text-aling:center; margin 5px;">
+                {{ session('message') }} 
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
         @endif
-    <form action="{{ url('comprase/'.$compras[0]->id.'/edit')}}" method="POST" style="margin:5px; padding: 5px; width: 95% ">
-        {!! csrf_field() !!} 
-        {{ method_field('PUT')}}
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="width:90%; text-aling:center; margin 5px;">
+                <ul style="text-aling:center;">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+    <form action="{{route('compras.update', $compras[0]->id)}}" method="post" style="margin:5px; padding: 5px; width: 95% ">
+        @csrf
+        @method('PUT')
         <div class="form-group">
             <label for="">Codigo</label>
-            <input type="number"  class="form-control" name="id" id="" readonly value="{{$id}}">
+            <input type="number"  class="form-control" name="id" required readonly value="{{$id}}">
         </div>
         <div class="form-group">
-        <label for="">Fecha</label>
-        <input type="date" class="form-control" name="fecha" required value="{{$compras[0]->fecha}}">
+            <label for="">Fecha</label>
+            <input type="date" class="form-control" name="fecha"  value="{{$compras[0]->fecha}}">
         </div>
         <div class="form-group">
             <label for="">Proveedor</label>
-            <select  class="form-control" name="id_proveedor" id="">
-                <option value="{{$compras[0]->id_proveedor}}">{{$compras[0]->nombre}}</option>
+            <select  class="form-control" name="proveedore_id" required>
+                <option value="{{$compras[0]->proveedore_id}}">{{$compras[0]->nombre}}</option>
                 @foreach ($Lproveedores as $item)
                 <option value="{{$item->id}}">{{$item->nombre}}</option>
                 @endforeach
@@ -49,8 +49,8 @@
         </div>
         <div class="form-group">
             <label for="">Tipo de Pago</label>
-            <select  class="form-control" name="id_tipo_pago" id="">
-                <option value="{{$compras[0]->id_tipo_pago}}">{{$compras[0]->tipo}}</option>
+            <select  class="form-control" name="tipospago_id" required>
+                <option value="{{$compras[0]->tipospago_id}}">{{$compras[0]->tipo}}</option>
                 @foreach ($Ltipospagos as $item)
                 <option value="{{$item->id}}">{{$item->tipo}}</option>
                 @endforeach
@@ -58,17 +58,17 @@
         </div>
         <div class="form-group">
             <label for="">Total iva</label>
-            <input type="number" step="0.01" class="form-control" name="total_iva" value="{{$tiva}}" readonly>
+            <input type="number" step="0.01" class="form-control" name="total_iva" required value="{{$totales[0]}}" readonly>
         </div>
         <div class="form-group">
             <label for="">Subtotal</label>
-            <input type="number" step="0.01" class="form-control" name="subtotal" value="{{$tsubtotal}}" readonly>
+            <input type="number" step="0.01" class="form-control" name="subtotal" required value="{{$totales[1]}}" readonly>
         </div>
         <div class="form-group">
             <label for="">Total</label>
-            <input type="number" step="0.01" class="form-control" name="total" value="{{$ttotal}}" readonly>
+            <input type="number" step="0.01" class="form-control" name="total" required value="{{$totales[2]}}" readonly>
         </div>
-        <input name="" id="" class="btn btn-primary" type="submit" value="Guardar">
+        <input class="btn btn-primary" type="submit" value="Guardar">
 
     </form>
     </div>
@@ -97,7 +97,7 @@
                                     @endforeach
                                    
                                 </select>
-                                <input type="hidden" name="id_productos" id="productocopia">
+                                <input type="hidden" name="producto_id" id="productocopia">
                             </div>
                         </td>
                         <td data-titulo="Costo:">
@@ -110,7 +110,7 @@
                             <input readonly type="number" name="subtotal" step="0.01" id="subtotal" style="width: 100px" class="form-control">
                         </td>
                         <td>
-                        <input type="hidden" name="id_compras" value="{{$id}}">
+                        <input type="hidden" name="compra_id" value="{{$id}}">
                         <input name="" id="" class="btn btn-success" type="submit" value="Agregar">
                         </td>
                     </tr>

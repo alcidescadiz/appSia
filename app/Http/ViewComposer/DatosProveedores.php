@@ -12,7 +12,7 @@ class DatosProveedores
 
     public function compose(View $View){
 
-        $Lproveedores = Proveedore::all();
+        $Lproveedores = Proveedore::select('id', 'nombre')->get();
         $View->with('Lproveedores', $Lproveedores);
     }
 

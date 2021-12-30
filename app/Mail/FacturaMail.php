@@ -10,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
 class FacturaMail extends Mailable
 {
     use Queueable, SerializesModels;
-    public $subject ='Factura de compra';
+    public $subject ='Factura de appSia';
     public $ventas;
     public $detalles;
     /**
@@ -31,6 +31,6 @@ class FacturaMail extends Mailable
      */
     public function build()
     {
-        return $this->view('components.imprimir');
+        return $this->view('components.email');
     }
 }

@@ -24,10 +24,11 @@
       </div>
     @endif
     <br>
-    
+
     <table class="table table-striped table-inverse">
         <thead class="thead-inverse">
             <tr> 
+                
                 <th>ID</th>
                 <th>FECHA</th>
                 <th>CLIENTE</th>

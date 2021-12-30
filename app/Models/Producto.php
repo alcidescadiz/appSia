@@ -13,13 +13,16 @@ class Producto extends Model
 
     protected $table = 'productos';
 
+    protected $primaryKey = 'id';
+
     protected $fillable = ['codigo','nombre','costo','porcentage_ganancia','precio_venta','gravable','tipo','foto', 'estatus'];
-	
-    public function detalle_compras(){
-        return $this->hasOne(DetalleCompra::class, 'id_productos');
+
+    public function setNombreAttribute($value)
+    {
+        $this->attributes['nombre']=strtoupper($value);
     }
-    public function detalle_ventas(){
-        return $this->hasMany(DetalleVenta::class, 'id_productos');
-    }  
-    
+    public function setCodigoAttribute($value)
+    {
+        $this->attributes['codigo']=strtoupper($value);
+    }
 }

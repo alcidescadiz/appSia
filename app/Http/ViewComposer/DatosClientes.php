@@ -12,11 +12,8 @@ class DatosClientes
 
     public function compose(View $View){
 
-
-        $Lclientes = Cliente::all();
-        $n_cuentas_pagar= DB::select("select count(*) as total from v_cuentas_por_pagar where estatus='pendiente'");
-        $n_cuentas_cobrar= DB::select("select count(*) as total from v_cuentas_por_cobrar where estatus='pendiente'");
-        $View->with(['Lclientes'=> $Lclientes, 'n_cuentas_pagar'=>$n_cuentas_pagar, 'n_cuentas_cobrar'=>$n_cuentas_cobrar]);
+        $Lclientes = Cliente::select('id', 'nombre')->get();
+        $View->with(['Lclientes'=> $Lclientes]);
     }
 
 

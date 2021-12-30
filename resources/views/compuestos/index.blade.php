@@ -90,7 +90,7 @@
                                 @endforeach
                                
                             </select>
-                            <input type="hidden" name="id_productos" id="productocopia">
+                            <input type="hidden" name="producto_id" id="productocopia">
                         </div>
                     </td>
                     <td data-titulo="Costo:">

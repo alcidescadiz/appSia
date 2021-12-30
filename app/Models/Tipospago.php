@@ -13,6 +13,12 @@ class Tipospago extends Model
 
     protected $table = 'tipospagos';
 
+    protected $primaryKey = 'id';
+
     protected $fillable = ['tipo','estatus'];
 	
+    public function setTipoAttribute($value)
+    {
+        $this->attributes['tipo']=strtoupper($value);
+    }
 }

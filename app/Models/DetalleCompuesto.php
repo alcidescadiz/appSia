@@ -12,6 +12,8 @@ class DetalleCompuesto extends Model
     public $timestamps = true;
 
     protected $table = 'detalle_compuestos';
+    
+    protected $primaryKey = 'id';
 
-    protected $fillable = ['id_compuesto', 'id_productos','costo','cantidad','subtotal', 'iva', 'estatus'];
+    protected $fillable = ['id_compuesto', 'producto_id','costo','cantidad','subtotal', 'iva', 'estatus'];
 }

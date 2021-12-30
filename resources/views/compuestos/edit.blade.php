@@ -40,7 +40,7 @@
         </div>
         <div class="form-group">
         <label for="">Nombre</label>
-        <input type="text" class="form-control" name="nombre" value="{{$productocompuesto[0]->nombre}}" readonly>
+        <input type="text" class="form-control" name="nombre" value="{{$productocompuesto[0]->nombre}}" >
         </div>
         <div class="form-group">
             <label for="">Costo</label>
@@ -48,7 +48,7 @@
         </div>
         <div class="form-group">
             <label for="">Porcentaje de Ganancia</label>
-            <input type="number"  step="0.01" class="form-control" required name="porcentage_ganancia"  id="porcentage_ganancia" onchange="precio_venta_compuesto()"  value="{{$productocompuesto[0]->porcentage_ganancia}}" >
+            <input type="number"  step="0.01" class="form-control"  name="porcentage_ganancia"  id="porcentage_ganancia" onchange="precio_venta_compuesto()"  value="{{$productocompuesto[0]->porcentage_ganancia}}" >
         </div>
         <div class="form-group">
             <label for="">Precio de Venta</label>
@@ -95,7 +95,7 @@
                                 @endforeach
                                
                             </select>
-                            <input type="hidden" name="id_productos" id="productocopia">
+                            <input type="hidden" name="producto_id" id="productocopia">
                         </div>
                     </td>
                     <td data-titulo="Costo:">

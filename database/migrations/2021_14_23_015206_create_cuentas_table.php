@@ -19,8 +19,8 @@ class CreateCuentasTable extends Migration
             $table->enum('tipo',['compras','ventas'])->default('compras');
             $table->date('fecha_pago')->required();
             $table->enum('estatus',['pendiente','cancelado'])->default('pendiente');
-            $table->integer('id_tipo_pago')->unsigned()->required();
-            $table->foreign('id_tipo_pago')->references('id')->on('tipospagos');
+            $table->integer('tipospago_id')->unsigned()->required();
+            $table->foreign('tipospago_id')->references('id')->on('tipospagos');
         });
     }
 

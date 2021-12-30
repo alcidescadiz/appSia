@@ -2,17 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreComprasRequest;
 use App\Models\Compra;
 use App\Models\DetalleCompra;
-use App\Models\DetalleCompuesto;
-use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\URL;
-use vendor\autoload;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class CompraController extends Controller
@@ -22,245 +17,76 @@ class CompraController extends Controller
     }
     
     public function index(){
-        $compras = DB::table('v_compras')->paginate(5);
-        return view('/compras/index', ['compras'=>$compras]);
+        return view('/compras/index', ['compras'=>DB::table('v_compras')->paginate(15)]);
     }
-    public function store(Request $request){
-       return  $this->validate($request, [
-            'fecha' => 'required',
-            'id_proveedor' => 'required',
-            'id_tipo_pago' => 'required',
-            'total_iva' => 'required|numeric',
-            'subtotal' => 'required|numeric',
-            'total' => 'required|numeric',
-            ]);
+    public function store(StoreComprasRequest $request){
+        
         Compra::create([
                 'fecha' => $request->get('fecha'),
-                'id_proveedor' => $request->get('id_proveedor'),
-                'id_tipo_pago' => $request->get('id_tipo_pago'),
+                'proveedore_id' => $request->get('proveedore_id'),
+                'tipospago_id' => $request->get('tipospago_id'),
                 'total_iva' => $request->get('total_iva'),
                 'subtotal' => $request->get('subtotal'),
                 'total' => $request->get('total'),
                 'estatus' => 'activo'
-            ]);
+        ]);
+            DB::table('cuentas')->insert([
+                'codigo' => $request->get('id'),
+                'tipo' => 'compras',
+                'fecha_pago' => $request->get('fecha'),
+                'estatus' => 'pendiente',
+                'tipospago_id' => $request->get('tipospago_id'),
+            ]); 
         session()->flash('message', 'La compra ha sido registrada');
         return redirect('compras');
     }
-    public function detallestore(Request $request){
-        $this->validate($request, [
-            'id_productos' => 'required',
-            'costo' => 'required|numeric',
-            'cantidad' => 'required|numeric',
-            'subtotal' => 'required|numeric',
-        ]);
-
-        $id_detalle = $request->get('id_productos');
-        //dd($id_detalle);
-        $busca = DB::select('SELECT id, gravable from productos where nombre= ?', [$id_detalle]);
-        $busca[0]->id;
-        $busca[0]->gravable;
-        if ($busca[0]->gravable === 'si') {
-            $monto_iva =$request->get('costo')*$request->get('cantidad') * 0.16;
-        }else {
-            $monto_iva = 0;
-        }
-        DetalleCompra::create([
-            'id_productos'=>$busca[0]->id,
-            'costo' => $request->get('costo'),
-            'cantidad' => $request->get('cantidad'),
-            'iva' => $monto_iva,
-            'subtotal' => $request->get('subtotal'),
-            'id_compras' => $request->get('id_compras')
-        ]);
-        session()->flash('message', 'Detalle a su compra ha sido agregado'); 
-        return redirect('/compras.create');
-    }
-
-    public function detallesedit(Request $request)
-    {
-        if ($request->get('id_productos')=== null || $request->get('costo')=== null || $request->get('cantidad')=== null || $request->get('subtotal')=== null) {
-            session()->flash('message', 'No hay detalles que registrar');
-        } else {
-            $this->validate($request, [
-                'id_productos' => 'required',
-                'costo' => 'required|numeric',
-                'cantidad' => 'required|numeric',
-                'subtotal' => 'required|numeric',
-            ]);
-            $id_detalle = $request->get('id_productos');
-            //dd($id_detalle);
-            $busca = DB::select('SELECT id, gravable from productos where nombre= ?', [$id_detalle]);
-            $busca[0]->id;
-            $busca[0]->gravable;
-            if ($busca[0]->gravable === 'si') {
-                $monto_iva =$request->get('costo')*$request->get('cantidad') * 0.16;
-            }else {
-                $monto_iva = 0;
-            }
-            DetalleCompra::create([
-                'id_productos'=>$busca[0]->id,
-                'costo' => $request->get('costo'),
-                'cantidad' => $request->get('cantidad'),
-                'iva' => $monto_iva,
-                'subtotal' => $request->get('subtotal'),
-                'id_compras' => $request->get('id_compras')
-            ]);
-            session()->flash('message', 'Detalle registrado');
-        }
-        // factura 
-        // coodigo proveedores productos y tipo de pago:
-        $id= $request->get('id_compras');
-        $productos = DB::table('productos')->get();  
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras = ?",[$id]);
-        if ($totales[0]->tiva===null) {
-            $tiva= 0;
-            $tsubtotal= 0;
-            $ttotal= 0;
-        }else {
-            $tiva= $totales[0]->tiva;
-            $tsubtotal= $totales[0]->tsubtotal;
-            $ttotal= $totales[0]->ttotal;
-        }
-        $detalles = DB::table('v_detalles_compras')->where('id_compras', $id)->get();
-        $compras= DB::select("SELECT * FROM v_compras where id =?", [$id]);
-        return view('compras/update',['compras'=>$compras, 'id'=>$id, 'productos'=>$productos->toArray(), 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
-    }
 
     public function show(){
-        // factura 
-        $codigo= DB::select("SELECT `AUTO_INCREMENT` as codigo FROM  INFORMATION_SCHEMA.TABLES
-        WHERE TABLE_SCHEMA = 'appsialaravel'
-        AND   TABLE_NAME   = 'compras'");
-        if (count($codigo)) {
-            $idnew = $codigo[0]->codigo;
-        }else {
-            $idnew=1;
-        }
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras = ?", [$idnew]);
-        if ($totales[0]->tiva===null) {
-            $tiva= 0;
-            $tsubtotal= 0;
-            $ttotal= 0;
-        }else {
-            $tiva= $totales[0]->tiva;
-            $tsubtotal= $totales[0]->tsubtotal;
-            $ttotal= $totales[0]->ttotal;
-        }  
+        $idnew= Compra::idnew();
+        $totales= Compra::totales($idnew);
         $productos = DB::table('productos')->get();  
-        $detalles = DB::table('v_detalles_compras')->where('id_compras', $idnew)->get();
-        return view('/compras.create', [ 'productos'=>$productos->toArray(), 'idnew'=>$idnew, 'detalles'=>$detalles, 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal]);
+        $detalles = DB::table('v_detalles_compras')->where('compra_id', $idnew)->get();
+        return view('/compras.create', [ 'productos'=>$productos->toArray(), 'idnew'=>$idnew, 'detalles'=>$detalles, 'totales'=>$totales]);
     }
-    
-    public function edit($id)
-    {
+    public function edit($id){
         $productos = DB::table('productos')->get();  
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras =?", [$id]);
-        //DD($totales);
-        if ($totales[0]->tiva===null) {
-            $tiva= 0;
-            $tsubtotal= 0;
-            $ttotal= 0;
-        }else {
-            $tiva= $totales[0]->tiva;
-            $tsubtotal= $totales[0]->tsubtotal;
-            $ttotal= $totales[0]->ttotal;
-        }
-        $detalles = DB::table('v_detalles_compras')->where('id_compras', $id)->get();
+        $totales= Compra::totales($id);
+        $detalles = DB::table('v_detalles_compras')->where('compra_id', $id)->get();
         $compras= DB::select("SELECT * FROM v_compras where id =?", [$id]);
-        return view('compras/update',['compras'=>$compras, 'id'=>$id, 'productos'=>$productos->toArray(), 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
+        return view('compras/update',['compras'=>$compras, 'id'=>$id, 'productos'=>$productos->toArray(), 'totales'=>$totales, 'detalles'=>$detalles]);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Compra  $compra
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request)
-    {
-       if ($request->get('fecha')) {
-           $this->validate($request, [
-               'fecha' => 'required',
-               'id_proveedor' => 'required',
-               'id_tipo_pago' => 'required',
-               'total_iva' => 'required|numeric',
-               'subtotal' => 'required|numeric',
-               'total' => 'required|numeric',
-               ]);
-               DB::table('compras')
-                   ->where('id',$request->get('id'))
-                   ->update([
-                       'fecha' => $request->get('fecha'),
-                       'id_proveedor' => $request->get('id_proveedor'),
-                       'id_tipo_pago' => $request->get('id_tipo_pago'),
-                       'total_iva' => $request->get('total_iva'),
-                       'subtotal' => $request->get('subtotal'),
-                       'total' => $request->get('total'),
-                   ]);
-               
-               session()->flash('message', 'Compra ha sido editada');
-               return redirect('compras');
-       }
+    public function update(Request $request, $id){
+            if ($request->get('fecha')=== null || $request->get('proveedore_id')=== null || $request->get('id') <> $id) {
+                session()->flash('message', 'Favor incluir todos los datos');
+                session()->flash('alert-class', 'alert-danger');
+                return $this->edit($id);
+            }else {
+                Compra::findOrFail($id)
+                ->update([
+                    'fecha' => $request->get('fecha'),
+                    'proveedore_id' => $request->get('proveedore_id'),
+                    'tipospago_id' => $request->get('tipospago_id'),
+                    'total_iva' => $request->get('total_iva'),
+                    'subtotal' => $request->get('subtotal'),
+                    'total' => $request->get('total'),
+                    'estatus' => 'activo'
+                ]);
+                DB::table('cuentas')->where('codigo', $id)->where('tipo', 'compras')
+                            ->update([
+                                'fecha_pago' => $request->get('fecha'),
+                                'tipospago_id' => $request->get('tipospago_id'),
+                            ]);
+                session()->flash('message', 'Compra ha sido editada');
+                return redirect('compras');    
+            }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Compra  $compra
-     * @return \Illuminate\Http\Response
-     */
-    public function compra_destroy($id)
-    {
-        DB::table('compras')
-            ->where('id', $id)
-            ->update([
-                'estatus' => 'eliminado',
-            ]);
-        DB::table('detalle_compras')
-            ->where('id_compras', $id)
-            ->update([
-                'estatus' => 'eliminado',
-            ]);
-        DB::table('cuentas')
-            ->where('codigo', $id)
-            ->where('tipo', 'compras')
-            ->update([
-                'estatus' => 'cancelado',
-            ]);
+    public function destroy($id){  
+        DB::table('compras')->where('id', $id)->update(['estatus' => 'eliminado',]);
+        DB::table('detalle_compras')->where('compra_id', $id)->update(['estatus' => 'eliminado']);
+        DB::table('cuentas')->where('codigo', $id)->where('tipo', 'compras')->update(['estatus' => 'cancelado']);
         session()->flash('message', 'La compra ha sido eliminada');
+        session()->flash('alert-class', 'alert-danger');
         return redirect('/compras');
-    }
-    public function detalledestroy($id)
-    {
-        DB::table('detalle_compras')->delete($id);
-        session()->flash('message', 'Detalle eliminado');
-        return redirect('/compras');
-    }
-    public function detalledestroyedit($id)
-    {
-        $id_compras = DB::select("SELECT id, id_compras FROM detalle_compras where id =?", [$id]);
-        $id_compras= $id_compras[0]->id_compras;
-        DB::table('detalle_compras')->delete($id);
-       // factura 
-        // coodigo proveedores productos y tipo de pago:
-        $id= $id_compras; 
-        $productos = DB::table('productos')->get();  
-        $totales= DB::select("select sum(iva) as tiva,sum(subtotal) as tsubtotal, (sum(iva)+sum(subtotal))as ttotal from detalle_compras where id_compras = ?", [$id]);
-        if ($totales[0]->tiva===null) {
-            $tiva= 0;
-            $tsubtotal= 0;
-            $ttotal= 0;
-        }else {
-            $tiva= $totales[0]->tiva;
-            $tsubtotal= $totales[0]->tsubtotal;
-            $ttotal= $totales[0]->ttotal;
-        }
-        $detalles = DB::table('v_detalles_compras')->where('id_compras', $id)->get();
-        $compras= DB::select("SELECT * FROM v_compras where id =?", [$id]);
-        session()->flash('message', 'Detalle eliminado');
-        return view('compras/update',['compras'=>$compras, 'id'=>$id, 'productos'=>$productos->toArray(), 'tiva'=>$tiva,'tsubtotal'=>$tsubtotal,'ttotal'=>$ttotal, 'detalles'=>$detalles]);
-    
     }
     public function export(){
         $documento = new Spreadsheet();
@@ -294,8 +120,6 @@ class CompraController extends Controller
 
         //consultar en base de datos segun filtros
         $compras = DB::table('v_compras')->get();
-
-   
         
         for ($i = 0; $i < count($compras); $i++) {
   
@@ -361,14 +185,12 @@ class CompraController extends Controller
 
         //consultar en base de datos segun filtros
         $dcompras = DB::table('v_detalles_compras')->get();
-
-   
         
         for ($i = 0; $i < count($dcompras); $i++) {
   
             //mostrar información de los bienes filtrados en la celdas
             $hoja->setCellValue("A" . $i+2, $dcompras[$i]->id);
-            $hoja->setCellValue("B" . $i+2, $dcompras[$i]->id_compras);
+            $hoja->setCellValue("B" . $i+2, $dcompras[$i]->compra_id);
             $hoja->setCellValue("C" . $i+2, $dcompras[$i]->nombre);
             $hoja->setCellValue("D" . $i+2, $dcompras[$i]->costo);
             $hoja->setCellValue("E" . $i+2, $dcompras[$i]->cantidad);
